@@ -333,13 +333,24 @@ function fmtCLP(n){return '$'+Math.round(n).toLocaleString('es-CL')}
 function pctClr(p){return p>=100?'#b91c1c':p>=80?'#92600a':'#0f6e56'}
 
 function normFecha(raw){
+  // Si viene como objeto Date de JavaScript (desde Sheets via JSON)
+  if(raw instanceof Date){
+    var d=raw;
+    return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+  }
   var s=String(raw||'').trim();
+  // Si contiene texto como "Wed Mar 25 2026..." parsear como Date
+  if(s.match(/^[A-Za-z]{3}\s/)){
+    var d=new Date(s);
+    if(!isNaN(d.getTime()))return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+  }
   // ISO timestamp: 2026-03-14T03:00:00.000Z
   var iso=s.match(/^(\d{4})-(\d{2})-(\d{2})T/);if(iso)return iso[3]+'-'+iso[2]+'-'+iso[1];
   // yyyy-MM-dd
   var ymd=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(ymd)return ymd[3]+'-'+ymd[2]+'-'+ymd[1];
-  // dd-MM-yyyy with optional time: 14-03-2026 0:00:00
-  var dmy=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);if(dmy)return dmy[1].padStart(2,'0')+'-'+dmy[2].padStart(2,'0')+'-'+dmy[3];
+  // dd-MM-yyyy con o sin hora
+  var dmy=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if(dmy)return dmy[1].padStart(2,'0')+'-'+dmy[2].padStart(2,'0')+'-'+dmy[3];
   return s;
 }
 function monthKey(fecha){
