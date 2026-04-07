@@ -325,7 +325,7 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
 </div>
 
 <script>
-var API = 'https://script.google.com/macros/s/AKfycbzqpQ2phUzrdQYCEKVsm0GI52eSCAoVnwGwa8gbjX90dm5sIThTQhtk-V68KiCEDRCU/exec';
+var API = 'https://script.google.com/macros/s/AKfycbyknOFknheXOjlkd7-bbqPSvxwG2WpUMvXA8W_lJ1-wNUOSavk2THWDswOHaSCutNjX/exec';
 var CATS = {
   'Alimentación':             {icon:'🍔', color:'#16a34a', subs:['Supermercado','Restaurantes','Delivery','Cafetería','Snack']},
   'Transporte':               {icon:'🚗', color:'#2563eb', subs:['Uber/Cabify','Bencina','Estacionamiento','Transporte público','Tag','Mantención y servicios','Scooter']},
@@ -409,26 +409,27 @@ async function cargarDatos(){
   btn.classList.add('loading');lbl.textContent='Cargando...';
   try{
     var data = await new Promise(function(resolve, reject) {
-      var cbName = 'cb_' + Date.now();
+      var cbName = 'jsonp_' + Date.now();
       var script = document.createElement('script');
-      var timeout = setTimeout(function() {
-        delete window[cbName];
-        document.body.removeChild(script);
-        reject(new Error('Timeout al cargar datos'));
-      }, 15000);
+      var timer = setTimeout(function() {
+        cleanup();
+        reject(new Error('Timeout - verifica que la Web App sea publica'));
+      }, 20000);
+      function cleanup() {
+        clearTimeout(timer);
+        if (window[cbName]) delete window[cbName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
       window[cbName] = function(d) {
-        clearTimeout(timeout);
-        delete window[cbName];
-        document.body.removeChild(script);
-        resolve(d);
+        cleanup();
+        resolve(Array.isArray(d) ? d : []);
+      };
+      script.onerror = function() {
+        cleanup();
+        reject(new Error('No se pudo conectar - verifica acceso "Cualquier usuario"'));
       };
       script.src = API + '?callback=' + cbName;
-      script.onerror = function() {
-        clearTimeout(timeout);
-        delete window[cbName];
-        reject(new Error('Error de red al conectar con Google'));
-      };
-      document.body.appendChild(script);
+      document.head.appendChild(script);
     });
     var remote=data.filter(function(r){return r.monto||r.Monto}).map(function(r,i){
       var fecha=normFecha(r.fecha||r.Fecha||'');
