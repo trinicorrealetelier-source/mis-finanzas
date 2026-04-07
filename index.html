@@ -310,8 +310,9 @@ var CATS={
   'Deporte':{icon:'🏃',color:'#7c3aed',subs:['Tenis','Padel','Becycle','Otros']},
   'Ropa y belleza':{icon:'👗',color:'#db2777',subs:['Ropa','Zapatos','Manos','Pelo','Estetica','Otros']},
   'Entretenimiento':{icon:'🎬',color:'#0891b2',subs:['Juegos','Viajes','Otros']},
+  'Carrete':{icon:'🥂',color:'#c026d3',subs:['Entradas','Copete','Otros']},
   'Pagos y servicios':{icon:'💳',color:'#d97706',subs:['Plan de celular','Seguros','Banco','Servicios financieros']},
-  'Otros gastos':{icon:'🎁',color:'#64748b',subs:['Regalos','Donaciones','Imprevistos','Carrete','Otros']},
+  'Otros gastos':{icon:'🎁',color:'#64748b',subs:['Regalos','Donaciones','Imprevistos','Otros']},
   'Ingresos laborales':{icon:'💰',color:'#0f6e56',subs:['Sueldo','Inversiones'],income:true},
   'Transferencias recibidas':{icon:'📥',color:'#0369a1',subs:['Alimentacion','Transporte','Salud','Deporte','Otros'],income:true}
 };
@@ -419,6 +420,19 @@ async function cargarDatos(){
     txns=txns.filter(function(t){return deletedStore.indexOf(t.id)===-1});
     txns.forEach(function(t){if(adjStore[t.id]!==undefined)t.monto=adjStore[t.id]});
     txns=txns.filter(function(t){return t.monto>0});
+    // Migrar: Otros gastos + subcategoria Carrete → categoria Carrete
+    txns.forEach(function(t){
+      if(t.cat==='Otros gastos' && t.sub==='Carrete'){
+        t.cat='Carrete';
+        t.sub='';
+        catStore[t.id]='Carrete';
+        subStore[t.id]='';
+        if(t.fk){catStore[t.fk]='Carrete';subStore[t.fk]=''}
+      }
+    });
+    localStorage.setItem('fc_cats',JSON.stringify(catStore));
+    localStorage.setItem('fc_subs',JSON.stringify(subStore));
+
     txns.sort(function(a,b){
       var da=a.fecha.split('-').reverse().join('');
       var db=b.fecha.split('-').reverse().join('');
