@@ -261,7 +261,7 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
             </div>
           </div>
         </div>
- 
+
       </div>
       <div class="view" id="view-movimientos">
         <div class="chip-row" id="chip-row"></div>
@@ -369,10 +369,10 @@ try{manuals=JSON.parse(localStorage.getItem('fc_manuals')||'[]')}catch(e){}
 try{adjStore=JSON.parse(localStorage.getItem('fc_adj')||'{}')}catch(e){}
 try{deletedStore=JSON.parse(localStorage.getItem('fc_del')||'[]')}catch(e){}
 try{editLog=JSON.parse(localStorage.getItem('fc_editlog')||'[]')}catch(e){}
- 
+
 function fmtCLP(n){return '$'+Math.round(n).toLocaleString('es-CL')}
 function pctClr(p){return p>=100?'#b91c1c':p>=80?'#92600a':'#0f6e56'}
- 
+
 function normFecha(raw){
   // Si viene como objeto Date de JavaScript (desde Sheets via JSON)
   if(raw instanceof Date){
@@ -410,7 +410,7 @@ function catTotals(){
   filtered().filter(function(t){return t.tipo==='expense'}).forEach(function(t){m[t.cat]=(m[t.cat]||0)+t.monto});
   return m;
 }
- 
+
 function buildMDD(){
   var menu=document.getElementById('mdd-menu'),lbl=document.getElementById('mdd-lbl');
   if(!menu||!lbl)return;
@@ -432,14 +432,20 @@ function pickMonth(m){
   document.getElementById('vs').textContent=m==='all'?'Todos los meses':(MO[p[1]]||p[1])+' '+p[0];
   buildMDD();renderAll();
 }
- 
+
 async function cargarDatos(){
   var btn=document.getElementById('sync-btn'),lbl=document.getElementById('sync-lbl');
   btn.classList.add('loading');lbl.textContent='Cargando...';
   try{
-    var res=await fetch(API);
+    // Fetch con timeout de 15 segundos
+    var controller=new AbortController();
+    var timeoutId=setTimeout(function(){controller.abort()},15000);
+    var res=await fetch(API,{signal:controller.signal});
+    clearTimeout(timeoutId);
     if(!res.ok)throw new Error('HTTP '+res.status);
-    var data=await res.json();
+    var text=await res.text();
+    var data;
+    try{data=JSON.parse(text)}catch(e){throw new Error('Respuesta invalida del servidor. Verifica que la Web App este publicada correctamente.')}
     var remote=data.filter(function(r){return r.monto||r.Monto}).map(function(r,i){
       var fecha=normFecha(r.fecha||r.Fecha||'');
       var desc=String(r.descripcion||r.Descripcion||'');
@@ -472,7 +478,7 @@ async function cargarDatos(){
     });
     localStorage.setItem('fc_cats',JSON.stringify(catStore));
     localStorage.setItem('fc_subs',JSON.stringify(subStore));
- 
+
     txns.sort(function(a,b){
       var da=a.fecha.split('-').reverse().join('');
       var db=b.fecha.split('-').reverse().join('');
@@ -487,11 +493,30 @@ async function cargarDatos(){
     renderAll();
   }catch(e){
     document.getElementById('vs').textContent='Error al cargar';
-    alert('No se pudo cargar: '+e.message);
+    var msg=e.name==='AbortError'?'Timeout: el servidor no respondio en 15 segundos.':e.message;
+    document.getElementById('k-inc').textContent='Error';
+    document.getElementById('k-exp').textContent='Error';
+    document.getElementById('k-bal').textContent='Error';
+    document.getElementById('k-sav').textContent='Error';
+    // Show error in content area
+    var errHtml='<div style="background:#FFF5F5;border:1px solid #FECACA;border-radius:10px;padding:20px;margin-top:20px;font-size:13px;color:#7F1D1D;line-height:1.8">'+
+      '<div style="font-weight:600;font-size:14px;color:#DC2626;margin-bottom:8px">No se pudo cargar la app</div>'+
+      '<div><b>Error:</b> '+msg+'</div>'+
+      '<div style="margin-top:12px;font-size:12px;color:#991B1B">'+
+        'Verifica que:<br>'+
+        '1. La Web App de Apps Script este publicada<br>'+
+        '2. El acceso sea "Cualquier usuario"<br>'+
+        '3. La URL del API sea correcta<br>'+
+        '4. Tengas conexion a internet'+
+      '</div>'+
+      '<div style="margin-top:12px"><b>URL del API:</b><br><span style="font-family:monospace;font-size:11px;word-break:break-all">'+API+'</span></div>'+
+      '<button onclick="cargarDatos()" style="margin-top:14px;height:36px;padding:0 16px;background:#DC2626;color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;">Reintentar</button>'+
+    '</div>';
+    document.querySelector('.content').insertAdjacentHTML('afterbegin',errHtml);
   }
   btn.classList.remove('loading');lbl.textContent='Actualizar';
 }
- 
+
 function setCat(id,cat,selEl){
   catStore[id]=cat;subStore[id]='';
   var t=txns.find(function(x){return x.id===id});
@@ -523,7 +548,7 @@ function setSub(id,sub){
   if(t)t.sub=sub;
 }
 function setLimit(cat,val){limits[cat]=parseInt(val)||0;localStorage.setItem('fc_limits',JSON.stringify(limits));renderAll()}
- 
+
 function showView(v,el){
   curView=v;filterCat=null;
   document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active')});
@@ -536,14 +561,14 @@ function showView(v,el){
   if(v==='ediciones')renderEdiciones();
   renderAll();
 }
- 
+
 function renderAll(){
   buildMDD();renderKPIs();
   if(curView==='dashboard'){renderTreemap(tmDrillCat);renderRad();renderCashflow();renderSav();renderPred()}
   if(curView==='movimientos')renderMov();
   if(curView==='limites')renderLim();
 }
- 
+
 function renderKPIs(){
   var ft=filtered();
   var inc=ft.filter(function(t){return t.tipo==='income'}).reduce(function(s,t){return s+t.monto},0);
@@ -555,7 +580,7 @@ function renderKPIs(){
   be.textContent=fmtCLP(Math.abs(bal));be.style.color=bal>=0?'#1d4ed8':'#b91c1c';
   document.getElementById('k-sav').textContent=sav+'%';
 }
- 
+
 function renderTreemap(drill){
   tmDrillCat=drill||null;
   var el=document.getElementById('treemap'),back=document.getElementById('tm-back'),badge=document.getElementById('tm-badge');
@@ -627,7 +652,7 @@ function squarify(items,x,y,w,h,tot){
   return rects;
 }
 function wr(items,sum,s,area,tot){var w=s*sum/tot;return items.reduce(function(mx,i){var h=i.value/sum*s;return Math.max(mx,Math.max(w/h,h/w))},0)}
- 
+
 function renderRad(){
   var ct=catTotals();
   var show=EXP.filter(function(c){return limits[c]>0}).length?EXP.filter(function(c){return limits[c]>0}):EXP.slice(0,6);
@@ -652,7 +677,7 @@ function renderRad(){
     '</div>';
   }).join('');
 }
- 
+
 function renderCashflow(){
   if(charts.cf)try{charts.cf.destroy()}catch(e){}
   var now=new Date(),months=[];
@@ -674,7 +699,7 @@ function renderCashflow(){
       scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{color:'#aaa',callback:function(v){return fmtCLP(v)}},grid:{color:'rgba(0,0,0,0.05)'}}}}
   });
 }
- 
+
 function renderSav(){
   var ft=filtered();
   var inc=ft.filter(function(t){return t.tipo==='income'}).reduce(function(s,t){return s+t.monto},0);
@@ -686,7 +711,7 @@ function renderSav(){
   document.getElementById('sav-saved').textContent=fmtCLP(Math.max(0,saved));
   document.getElementById('sav-inc').textContent=fmtCLP(inc);
 }
- 
+
 function renderPred(){
   var ct=catTotals(),sorted=Object.entries(ct).sort(function(a,b){return b[1]-a[1]}).slice(0,5);
   var el=document.getElementById('pred-list');
@@ -697,7 +722,7 @@ function renderPred(){
     return '<div class="pred-row"><div class="pred-dot" style="background:'+info.color+'"></div><div class="pred-name">'+cat+'</div><div class="pred-curr">'+fmtCLP(spent)+'</div><div class="pred-arrow">&#8594;</div><div class="pred-proj '+(isUp?'pred-up':'pred-dn')+'">'+fmtCLP(proj)+'</div><span class="pred-badge '+(isUp?'up':'dn')+'">'+(isUp?'+':'')+pct+'%</span></div>';
   }).join('');
 }
- 
+
 function renderMov(){
   document.getElementById('chip-row').innerHTML=['Todos'].concat(EXP).concat(INC).map(function(c){
     var a=(c==='Todos'&&!filterCat)||filterCat===c?'active':'';
@@ -717,7 +742,7 @@ function renderMov(){
   }).join('');
 }
 function setFilter(c){filterCat=c==='Todos'?null:c;renderMov()}
- 
+
 function renderLim(){
   var ct=catTotals();
   var totalLim=EXP.reduce(function(s,cat){return s+(limits[cat]||0)},0);
@@ -728,7 +753,7 @@ function renderLim(){
   var tasaReal=totalInc>0?Math.round(montoAhorrado/totalInc*100):0;
   var metaAhorro=70; // meta fija 70%
   var pctUsado=totalLim>0?Math.round(totalSpent/totalLim*100):0;
- 
+
   // ── HERO CARD ──
   var heroEl=document.getElementById('lim-hero-wrap');
   if(heroEl){
@@ -752,7 +777,7 @@ function renderLim(){
         '<div class="lim-hero-bar-labels"><span>Ahorro actual: '+tasaReal+'%</span><span style="color:#F59E0B">Meta: '+metaAhorro+'%</span></div>'+
       '</div>';
   }
- 
+
   // ── CATEGORY CARDS — sorted by overage ──
   var catData=EXP.map(function(cat){
     var lim=limits[cat]||0, spent=ct[cat]||0;
@@ -765,7 +790,7 @@ function renderLim(){
     if(b.pct>100&&a.pct<=100)return 1;
     return b.pct-a.pct;
   });
- 
+
   var gridEl=document.getElementById('lim-grid');
   gridEl.innerHTML=catData.map(function(d){
     var info=CATS[d.cat]||{icon:'?',color:'#888'};
@@ -794,7 +819,7 @@ function renderLim(){
       (d.lim?'<div class="lp-track"><div class="lp-fill" style="width:'+barWidth+'%;background:'+barColor+'"></div></div>':'<div class="lp-track"></div>')+
     '</div>';
   }).join('');
- 
+
   // ── ALERT ──
   var alertEl=document.getElementById('lim-alert-wrap');
   if(alertEl){
@@ -811,7 +836,7 @@ function renderLim(){
       alertEl.innerHTML='';
     }
   }
- 
+
   // ── TIP ──
   var tipEl=document.getElementById('lim-tip-wrap');
   if(tipEl&&totalInc>0){
@@ -835,7 +860,7 @@ function renderLim(){
     }
   }
 }
- 
+
 function sugerirPresupuesto(){
   var keys=[...new Set(txns.map(function(t){return monthKey(t.fecha)}).filter(Boolean))].sort();
   var last3=keys.slice(-3);
@@ -853,10 +878,10 @@ function sugerirPresupuesto(){
   if(n>0){localStorage.setItem('fc_limits',JSON.stringify(limits));renderAll();alert('Se aplicaron '+n+' sugerencias.')}
   else alert('Todas las categorias ya tienen limite.');
 }
- 
+
 function closeOverlay(id){document.getElementById(id).classList.remove('open');_modalId=null}
 function agregarEdicion(e){editLog.unshift(e);localStorage.setItem('fc_editlog',JSON.stringify(editLog))}
- 
+
 function abrirEliminar(id){
   _modalId=id;
   var t=txns.find(function(x){return x.id===id});
@@ -897,7 +922,7 @@ function confirmarDividir(){
   localStorage.setItem('fc_adj',JSON.stringify(adjStore));
   closeOverlay('ov-div');renderAll();
 }
- 
+
 function updAddCats(){
   var tipo=document.getElementById('add-tipo').value,cats=tipo==='income'?INC:EXP;
   document.getElementById('add-cat').innerHTML=cats.map(function(c){return'<option value="'+c+'">'+(CATS[c]?CATS[c].icon:'')+' '+c+'</option>'}).join('');updAddSubs();
@@ -941,7 +966,7 @@ function renderManList(){
     return '<div class="man-row"><div class="man-dot" style="background:'+info.color+'"></div><div class="man-info"><div class="man-desc">'+m.descripcion+'</div><div class="man-meta">'+m.cat+(m.sub?' - '+m.sub:'')+' - '+m.fecha+'</div></div><span class="amt '+cls+'">'+sign+fmtCLP(m.monto)+'</span><button class="man-del" onclick="delManual(\''+m.id+'\')">&#10005;</button></div>';
   }).join('');
 }
- 
+
 function limpiarEdiciones(){
   if(!confirm('Seguro que quieres limpiar todo el historial?'))return;
   editLog=[];localStorage.setItem('fc_editlog',JSON.stringify(editLog));renderEdiciones();
@@ -956,7 +981,7 @@ function renderEdiciones(){
       return '<tr><td style="font-size:11px;color:var(--muted);white-space:nowrap;padding-right:12px">'+e.timestamp+'</td><td><span style="font-size:11px;font-weight:500;color:'+color+'">'+e.tipo+'</span></td><td class="txn-desc">'+e.descripcion+'</td><td style="font-size:12px;font-family:var(--mono);color:var(--red)">'+fmtCLP(e.monto)+'</td><td style="font-size:11px;color:var(--muted)">'+e.fecha+'</td><td style="font-size:12px;color:var(--muted)">'+e.motivo+'</td></tr>';
     }).join('')+'</tbody></table>';
 }
- 
+
 function exportarCSV(){
   if(!txns.length){alert('No hay datos para exportar.');return}
   var lines=['fecha,descripcion,monto,tipo,categoria,subcategoria,origen'];
@@ -966,7 +991,7 @@ function exportarCSV(){
   a.href=url;a.download='finanzas'+(selMonth&&selMonth!=='all'?'_'+selMonth:'_todos')+'.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
- 
+
 window.addEventListener('resize',function(){if(txns.length)renderTreemap(tmDrillCat)});
 document.addEventListener('click',function(e){
   var dd=document.getElementById('mdd');
