@@ -184,6 +184,84 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
 .view{display:none}.view.active{display:block}
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .card{animation:fu 0.25s ease both}.kpi{animation:fu 0.2s ease both}
+/* ── Presupuestos: mejoras visuales desktop ─────────────────────── */
+.lim-wrap {
+  max-width: 860px;   /* más ancho en desktop */
+  margin: 0 auto;
+  padding: 0 4px;
+}
+
+.lim-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);  /* 3 columnas en desktop */
+  gap: 12px;
+}
+
+/* En pantallas más chicas vuelve a 2 columnas */
+@media (max-width: 900px) {
+  .lim-grid { grid-template-columns: repeat(2, 1fr); }
+  .lim-wrap { max-width: 560px; }
+}
+
+.lim-card {
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.lim-inp {
+  flex: 1;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg3);
+  color: var(--text);
+  font-size: 13px;          /* más grande que antes (era 12px) */
+  font-family: var(--mono);
+  padding: 0 10px;
+  text-align: right;
+  min-width: 0;
+}
+
+.lim-inp:focus {
+  outline: none;
+  border-color: var(--green);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(15,110,86,0.08);
+}
+
+.lim-spent {
+  font-size: 20px;  /* ligeramente más grande */
+}
+
+.lim-hero {
+  border-radius: 18px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+.lim-hero-avail {
+  font-size: 36px;  /* más prominente */
+  margin-bottom: 20px;
+}
+
+.lim-hero-stats {
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.lim-hero-stat {
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.lim-hero-stat .hs-val {
+  font-size: 18px;
+}
+
+/* Quita el last-child full-width cuando hay 3 columnas */
+.lim-grid .lim-card:last-child:nth-child(odd) {
+  grid-column: auto;
+}
 </style>
 </head>
 <body>
@@ -683,8 +761,20 @@ function setSub(id, sub) {
   localStorage.setItem('fc_subs', JSON.stringify(subStore));
 }
 
+// ─── Helper: formatea número para mostrar en input (sin $ pero con puntos) ───
+function fmtInputNum(n) {
+  if (!n) return '';
+  return Math.round(n).toLocaleString('es-CL');
+}
+
+// ─── Helper: parsea input con o sin puntos de miles ──────────────────────────
+function parseInputNum(str) {
+  // Elimina puntos de miles y cualquier símbolo antes de parsear
+  return parseInt(String(str).replace(/\./g, '').replace(/[^0-9]/g, ''), 10) || 0;
+}
+
 function setLimit(cat, val) {
-  limits[cat] = parseInt(val, 10) || 0;
+  limits[cat] = parseInputNum(val);
   localStorage.setItem('fc_limits', JSON.stringify(limits));
   renderAll();
 }
@@ -1137,7 +1227,7 @@ function renderLim() {
       '</div>' +
       '<div class="lim-inp-wrap">' +
         '<span class="lim-inp-lbl">Limite:</span>' +
-        '<input class="lim-inp" type="number" placeholder="Sin limite" value="' + (d.lim || '') + '" />' +
+        '<input class="lim-inp" type="text" inputmode="numeric" placeholder="Sin limite" value="' + fmtInputNum(d.lim) + '" />' +
       '</div>' +
       (pctOfTotal !== null ? '<div class="lim-pct-of-total">' + pctOfTotal + '% del presupuesto total</div>' : '') +
       (d.lim ? '<div class="lp-track"><div class="lp-fill" style="width:' + barWidth + '%;background:' + barColor + '"></div></div>' : '<div class="lp-track"></div>');
