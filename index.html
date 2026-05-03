@@ -112,7 +112,7 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
 .man-desc{font-size:13px}.man-meta{font-size:11px;color:var(--muted);margin-top:2px}
 .man-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
 .man-del:hover{color:#b91c1c}
-.lim-wrap{max-width:480px;margin:0 auto}
+.lim-wrap{max-width:960px;margin:0 auto}
 .lim-hero{background:linear-gradient(135deg,#1A1A2E 0%,#16213E 100%);border-radius:16px;padding:20px;margin-bottom:20px;color:#fff}
 .lim-hero-avail-lbl{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
 .lim-hero-avail{font-size:28px;font-weight:700;font-family:var(--mono);letter-spacing:-1px;margin-bottom:16px}
@@ -129,8 +129,7 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
 .lim-bar-ttl{font-size:13px;font-weight:600;color:var(--text)}
 .lim-suggest-btn{height:30px;padding:0 12px;border:1px solid var(--green);border-radius:var(--rsm);background:transparent;color:var(--green);font-size:12px;font-family:var(--font);cursor:pointer;font-weight:500}
 .lim-suggest-btn:hover{background:rgba(15,110,86,0.06)}
-.lim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.lim-grid .lim-card:last-child:nth-child(odd){grid-column:1/-1}
+.lim-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));gap:14px}
 .lim-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;transition:box-shadow 0.15s}
 .lim-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
 .lim-card.over{background:#FFF5F5;border-color:#FECACA}
@@ -637,6 +636,7 @@ var controller  = new AbortController();
         var catRaw   = String(r.categoria || r.Categoria || 'Otros gastos');
         var id       = String(r.id_operacion || r.id || 'row_' + (i + 2));
         var isIncome = tipoRaw.includes('ingreso');
+        var origenRaw = String(r.origen || r.Origen || 'banco');
 
         // Clave de fallback para migrar categorías guardadas antes de que hubiera id_operacion
         var fk = desc.trim().toLowerCase() + '_' + fecha + '_' + monto;
@@ -649,9 +649,9 @@ var controller  = new AbortController();
           subStore[id] = subStore[fk];
         }
 
-        return { id: id, fecha: fecha, descripcion: desc, monto: monto,
+return { id: id, fecha: fecha, descripcion: desc, monto: monto,
                  tipo: isIncome ? 'income' : 'expense',
-                 cat: catFinal, sub: subFinal, manual: false, fk: fk };
+                 cat: catFinal, sub: subFinal, manual: false, fk: fk, origen: origenRaw };
       })
       .filter(function(t) { return t.monto > 0; });
 
@@ -1433,8 +1433,7 @@ function agregarManual() {
   var p     = fechaRaw.split('-');
   var fecha = p[2] + '-' + p[1] + '-' + p[0];
   var id    = 'manual_' + Date.now();
-  var entry = { id: id, fecha: fecha, descripcion: desc, monto: monto, tipo: tipo, cat: cat, sub: sub, manual: true };
-
+var entry = { id: id, fecha: fecha, descripcion: desc, monto: monto, tipo: tipo, cat: cat, sub: sub, manual: true, origen: 'manual' };
   manuals.unshift(entry);
   txns.unshift(entry);
   catStore[id] = cat;
@@ -1538,9 +1537,9 @@ function exportarCSV() {
       (t.descripcion || '').replace(/,/g, ' '),
       t.monto,
       t.tipo === 'income' ? 'ingreso' : 'gasto',
-      (t.cat || '').replace(/,/g, ' '),
+(t.cat || '').replace(/,/g, ' '),
       (t.sub || '').replace(/,/g, ' '),
-      t.manual ? 'manual' : 'banco'
+      t.origen || (t.manual ? 'manual' : 'banco')
     ].join(','));
   });
   var blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
