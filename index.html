@@ -1475,8 +1475,63 @@ document.addEventListener('click', function(e) {
   });
 });
 
-// ─── Inicio ───────────────────────────────────────────────────────────────────
-cargarDatos();
+// ─── Inicio: espera a que el DOM esté completamente renderizado ───────────────
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Event delegation en menú de meses
+  var mddMenu = document.getElementById('mdd-menu');
+  if (mddMenu) {
+    mddMenu.addEventListener('click', function(e) {
+      var opt = e.target.closest('.mdd-opt');
+      if (!opt) return;
+      pickMonth(opt.dataset.month);
+    });
+  }
+
+  // Event delegation en tabla de movimientos
+  var txnBody = document.getElementById('txn-body');
+  if (txnBody) {
+    txnBody.addEventListener('change', function(e) {
+      var el  = e.target;
+      var id  = el.dataset.id;
+      var act = el.dataset.action;
+      if (!id || !act) return;
+      if (act === 'set-cat') setCat(id, el.value, el);
+      else if (act === 'set-sub') setSub(id, el.value);
+    });
+
+    txnBody.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      var id  = btn.dataset.id;
+      var act = btn.dataset.action;
+      if (!id || !act) return;
+      if (act === 'eliminar') abrirEliminar(id);
+      if (act === 'dividir')  abrirDividir(id);
+    });
+  }
+
+  // Event delegation para chips de categoría
+  var chipRow = document.getElementById('chip-row');
+  if (chipRow) {
+    chipRow.addEventListener('click', function(e) {
+      var chip = e.target.closest('.chip');
+      if (chip) setFilter(chip.dataset.cat);
+    });
+  }
+
+  // Event delegation para botones de eliminar manuales
+  var manList = document.getElementById('man-list');
+  if (manList) {
+    manList.addEventListener('click', function(e) {
+      var btn = e.target.closest('.man-del');
+      if (btn) delManual(btn.dataset.id);
+    });
+  }
+
+  // Carga inicial de datos
+  cargarDatos();
+});
 </script>
 </body>
 </html>
