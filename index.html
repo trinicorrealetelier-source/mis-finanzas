@@ -532,9 +532,13 @@ async function cargarDatos() {
   lbl.textContent = 'Cargando...';
 
   try {
-    var controller  = new AbortController();
+var controller  = new AbortController();
     var timeoutId   = setTimeout(function() { controller.abort(); }, 15000);
-    var res         = await fetch(API, { signal: controller.signal });
+    
+    // El truco para engañar a la caché agregando los milisegundos actuales
+    var urlSinCache = API + '?t=' + new Date().getTime(); 
+    var res         = await fetch(urlSinCache, { signal: controller.signal });
+    
     clearTimeout(timeoutId);
 
     if (!res.ok) throw new Error('HTTP ' + res.status);
