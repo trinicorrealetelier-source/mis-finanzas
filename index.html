@@ -112,25 +112,60 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
 .man-desc{font-size:13px}.man-meta{font-size:11px;color:var(--muted);margin-top:2px}
 .man-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
 .man-del:hover{color:#b91c1c}
-.lim-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-.lim-sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px}
-.lim-sc .sc-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
-.lim-sc .sc-val{font-size:20px;font-weight:600;font-family:var(--mono)}
-.lim-sc .sc-sub{font-size:11px;color:var(--dim);margin-top:3px}
+/* PRESUPUESTO REDESIGN */
+.lim-wrap{max-width:480px;margin:0 auto}
+.lim-hero{background:linear-gradient(135deg,#1A1A2E 0%,#16213E 100%);border-radius:16px;padding:20px;margin-bottom:20px;color:#fff}
+.lim-hero-avail-lbl{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.lim-hero-avail{font-size:28px;font-weight:700;font-family:var(--mono);letter-spacing:-1px;margin-bottom:16px}
+.lim-hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.lim-hero-stat{background:rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px}
+.lim-hero-stat .hs-lbl{font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.lim-hero-stat .hs-val{font-size:16px;font-weight:700;font-family:var(--mono)}
+.lim-hero-stat .hs-sub{font-size:10px;margin-top:2px;opacity:0.7}
+.lim-hero-bar-wrap{position:relative;height:6px;background:rgba(255,255,255,0.12);border-radius:3px;overflow:visible}
+.lim-hero-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#22C55E,#4ADE80);transition:width 0.6s}
+.lim-hero-bar-marker{position:absolute;top:-4px;width:2px;height:14px;background:#F59E0B;border-radius:1px}
+.lim-hero-bar-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:rgba(255,255,255,0.45)}
 .lim-bar-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.lim-bar-ttl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
+.lim-bar-ttl{font-size:13px;font-weight:600;color:var(--text)}
 .lim-suggest-btn{height:30px;padding:0 12px;border:1px solid var(--green);border-radius:var(--rsm);background:transparent;color:var(--green);font-size:12px;font-family:var(--font);cursor:pointer;font-weight:500}
 .lim-suggest-btn:hover{background:rgba(15,110,86,0.06)}
 .lim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.lim-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:14px}
-.lim-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.lim-icon{font-size:16px}.lim-name{flex:1;font-size:13px;font-weight:500}
-.lim-pct-budget{font-size:11px;color:var(--muted);font-family:var(--mono);background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;flex-shrink:0}
-.lim-inp{width:96px;height:28px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);color:var(--text);font-size:12px;font-family:var(--mono);padding:0 8px;text-align:right;flex-shrink:0}
+.lim-grid .lim-card:last-child:nth-child(odd){grid-column:1/-1}
+.lim-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;transition:box-shadow 0.15s}
+.lim-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.lim-card.over{background:#FFF5F5;border-color:#FECACA}
+.lim-card.warn{background:#FFFBEB;border-color:#FDE68A}
+.lim-card.ok{background:#F0FDF4;border-color:#BBF7D0}
+.lim-card.zero{background:#FAFAFA;border-color:var(--border)}
+.lim-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
+.lim-icon{font-size:18px;margin-top:1px}
+.lim-name{flex:1;font-size:13px;font-weight:500;color:var(--text)}
+.lim-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0}
+.lim-badge.over{background:#FEE2E2;color:#EF4444}
+.lim-badge.warn{background:#FEF3C7;color:#F59E0B}
+.lim-badge.ok{background:#DCFCE7;color:#22C55E}
+.lim-badge.zero{background:#F3F4F6;color:#9CA3AF}
+.lim-amounts{display:flex;align-items:baseline;gap:6px;margin-bottom:8px}
+.lim-spent{font-size:18px;font-weight:700;font-family:var(--mono)}
+.lim-spent.over{color:#EF4444}.lim-spent.ok{color:#16A34A}.lim-spent.zero{color:#9CA3AF}
+.lim-of{font-size:11px;color:var(--muted)}
+.lim-inp-wrap{display:flex;align-items:center;gap:4px;margin-bottom:6px}
+.lim-inp-lbl{font-size:10px;color:var(--muted)}
+.lim-inp{flex:1;height:26px;border:1px solid var(--border);border-radius:5px;background:var(--bg3);color:var(--text);font-size:12px;font-family:var(--mono);padding:0 7px;text-align:right}
 .lim-inp:focus{outline:none;border-color:var(--green)}
-.lp-track{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-bottom:4px}
-.lp-fill{height:100%;border-radius:2px;transition:width 0.5s}
-.lp-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);font-family:var(--mono)}
+.lim-pct-of-total{font-size:10px;color:var(--muted);margin-bottom:5px}
+.lp-track{height:5px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden}
+.lp-fill{height:100%;border-radius:3px;transition:width 0.5s}
+.lim-alert{background:#FFF5F5;border:1px solid #FECACA;border-radius:10px;padding:14px;margin-top:14px;display:flex;gap:10px}
+.lim-alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.lim-alert-ttl{font-size:12px;font-weight:600;color:#DC2626;margin-bottom:4px}
+.lim-alert-txt{font-size:11px;color:#7F1D1D;line-height:1.5}
+.lim-tip{background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #C4B5FD;border-radius:10px;padding:14px;margin-top:10px;display:flex;gap:10px}
+.lim-tip-icon{font-size:16px;flex-shrink:0}
+.lim-tip-ttl{font-size:12px;font-weight:600;color:#5B21B6;margin-bottom:4px}
+.lim-tip-txt{font-size:11px;color:#4C1D95;line-height:1.5}
+.lim-meta-row{font-size:10px;color:var(--muted);margin-top:4px}
 .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:500;display:none;align-items:center;justify-content:center}
 .overlay.open{display:flex}
 .modal{background:var(--bg1);border:1px solid var(--border2);border-radius:var(--r);padding:24px;width:360px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
@@ -226,7 +261,7 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
             </div>
           </div>
         </div>
-
+ 
       </div>
       <div class="view" id="view-movimientos">
         <div class="chip-row" id="chip-row"></div>
@@ -261,12 +296,16 @@ body{font-family:var(--font);background:var(--bg0);color:var(--text);min-height:
         </div>
       </div>
       <div class="view" id="view-limites">
-        <div class="lim-summary" id="lim-summary"></div>
-        <div class="lim-bar-top">
-          <span class="lim-bar-ttl">Limite por categoria</span>
-          <button class="lim-suggest-btn" onclick="sugerirPresupuesto()">Sugerir basado en historial</button>
+        <div class="lim-wrap">
+          <div id="lim-hero-wrap"></div>
+          <div class="lim-bar-top">
+            <span class="lim-bar-ttl">Categorias del mes</span>
+            <button class="lim-suggest-btn" onclick="sugerirPresupuesto()">Sugerir limites</button>
+          </div>
+          <div class="lim-grid" id="lim-grid"></div>
+          <div id="lim-alert-wrap"></div>
+          <div id="lim-tip-wrap"></div>
         </div>
-        <div class="lim-grid" id="lim-grid"></div>
       </div>
       <div class="view" id="view-ediciones">
         <div class="card" style="animation:none">
@@ -330,10 +369,10 @@ try{manuals=JSON.parse(localStorage.getItem('fc_manuals')||'[]')}catch(e){}
 try{adjStore=JSON.parse(localStorage.getItem('fc_adj')||'{}')}catch(e){}
 try{deletedStore=JSON.parse(localStorage.getItem('fc_del')||'[]')}catch(e){}
 try{editLog=JSON.parse(localStorage.getItem('fc_editlog')||'[]')}catch(e){}
-
+ 
 function fmtCLP(n){return '$'+Math.round(n).toLocaleString('es-CL')}
 function pctClr(p){return p>=100?'#b91c1c':p>=80?'#92600a':'#0f6e56'}
-
+ 
 function normFecha(raw){
   // Si viene como objeto Date de JavaScript (desde Sheets via JSON)
   if(raw instanceof Date){
@@ -371,7 +410,7 @@ function catTotals(){
   filtered().filter(function(t){return t.tipo==='expense'}).forEach(function(t){m[t.cat]=(m[t.cat]||0)+t.monto});
   return m;
 }
-
+ 
 function buildMDD(){
   var menu=document.getElementById('mdd-menu'),lbl=document.getElementById('mdd-lbl');
   if(!menu||!lbl)return;
@@ -393,7 +432,7 @@ function pickMonth(m){
   document.getElementById('vs').textContent=m==='all'?'Todos los meses':(MO[p[1]]||p[1])+' '+p[0];
   buildMDD();renderAll();
 }
-
+ 
 async function cargarDatos(){
   var btn=document.getElementById('sync-btn'),lbl=document.getElementById('sync-lbl');
   btn.classList.add('loading');lbl.textContent='Cargando...';
@@ -433,7 +472,7 @@ async function cargarDatos(){
     });
     localStorage.setItem('fc_cats',JSON.stringify(catStore));
     localStorage.setItem('fc_subs',JSON.stringify(subStore));
-
+ 
     txns.sort(function(a,b){
       var da=a.fecha.split('-').reverse().join('');
       var db=b.fecha.split('-').reverse().join('');
@@ -452,7 +491,7 @@ async function cargarDatos(){
   }
   btn.classList.remove('loading');lbl.textContent='Actualizar';
 }
-
+ 
 function setCat(id,cat,selEl){
   catStore[id]=cat;subStore[id]='';
   var t=txns.find(function(x){return x.id===id});
@@ -484,7 +523,7 @@ function setSub(id,sub){
   if(t)t.sub=sub;
 }
 function setLimit(cat,val){limits[cat]=parseInt(val)||0;localStorage.setItem('fc_limits',JSON.stringify(limits));renderAll()}
-
+ 
 function showView(v,el){
   curView=v;filterCat=null;
   document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active')});
@@ -497,14 +536,14 @@ function showView(v,el){
   if(v==='ediciones')renderEdiciones();
   renderAll();
 }
-
+ 
 function renderAll(){
   buildMDD();renderKPIs();
   if(curView==='dashboard'){renderTreemap(tmDrillCat);renderRad();renderCashflow();renderSav();renderPred()}
   if(curView==='movimientos')renderMov();
   if(curView==='limites')renderLim();
 }
-
+ 
 function renderKPIs(){
   var ft=filtered();
   var inc=ft.filter(function(t){return t.tipo==='income'}).reduce(function(s,t){return s+t.monto},0);
@@ -516,7 +555,7 @@ function renderKPIs(){
   be.textContent=fmtCLP(Math.abs(bal));be.style.color=bal>=0?'#1d4ed8':'#b91c1c';
   document.getElementById('k-sav').textContent=sav+'%';
 }
-
+ 
 function renderTreemap(drill){
   tmDrillCat=drill||null;
   var el=document.getElementById('treemap'),back=document.getElementById('tm-back'),badge=document.getElementById('tm-badge');
@@ -588,7 +627,7 @@ function squarify(items,x,y,w,h,tot){
   return rects;
 }
 function wr(items,sum,s,area,tot){var w=s*sum/tot;return items.reduce(function(mx,i){var h=i.value/sum*s;return Math.max(mx,Math.max(w/h,h/w))},0)}
-
+ 
 function renderRad(){
   var ct=catTotals();
   var show=EXP.filter(function(c){return limits[c]>0}).length?EXP.filter(function(c){return limits[c]>0}):EXP.slice(0,6);
@@ -613,7 +652,7 @@ function renderRad(){
     '</div>';
   }).join('');
 }
-
+ 
 function renderCashflow(){
   if(charts.cf)try{charts.cf.destroy()}catch(e){}
   var now=new Date(),months=[];
@@ -635,7 +674,7 @@ function renderCashflow(){
       scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{color:'#aaa',callback:function(v){return fmtCLP(v)}},grid:{color:'rgba(0,0,0,0.05)'}}}}
   });
 }
-
+ 
 function renderSav(){
   var ft=filtered();
   var inc=ft.filter(function(t){return t.tipo==='income'}).reduce(function(s,t){return s+t.monto},0);
@@ -647,7 +686,7 @@ function renderSav(){
   document.getElementById('sav-saved').textContent=fmtCLP(Math.max(0,saved));
   document.getElementById('sav-inc').textContent=fmtCLP(inc);
 }
-
+ 
 function renderPred(){
   var ct=catTotals(),sorted=Object.entries(ct).sort(function(a,b){return b[1]-a[1]}).slice(0,5);
   var el=document.getElementById('pred-list');
@@ -658,7 +697,7 @@ function renderPred(){
     return '<div class="pred-row"><div class="pred-dot" style="background:'+info.color+'"></div><div class="pred-name">'+cat+'</div><div class="pred-curr">'+fmtCLP(spent)+'</div><div class="pred-arrow">&#8594;</div><div class="pred-proj '+(isUp?'pred-up':'pred-dn')+'">'+fmtCLP(proj)+'</div><span class="pred-badge '+(isUp?'up':'dn')+'">'+(isUp?'+':'')+pct+'%</span></div>';
   }).join('');
 }
-
+ 
 function renderMov(){
   document.getElementById('chip-row').innerHTML=['Todos'].concat(EXP).concat(INC).map(function(c){
     var a=(c==='Todos'&&!filterCat)||filterCat===c?'active':'';
@@ -678,44 +717,125 @@ function renderMov(){
   }).join('');
 }
 function setFilter(c){filterCat=c==='Todos'?null:c;renderMov()}
-
+ 
 function renderLim(){
   var ct=catTotals();
-  var totalLim=EXP.reduce(function(s,c){return s+(limits[c]||0)},0);
-  var totalSpent=EXP.reduce(function(s,c){return s+(ct[c]||0)},0);
+  var totalLim=EXP.reduce(function(s,cat){return s+(limits[cat]||0)},0);
+  var totalSpent=EXP.reduce(function(s,cat){return s+(ct[cat]||0)},0);
   var ft=filtered();
   var totalInc=ft.filter(function(t){return t.tipo==='income'}).reduce(function(s,t){return s+t.monto},0);
-  var ahorro=totalLim>0?totalInc-totalLim:0;
-  var tasaAhorro=totalInc>0&&totalLim>0?Math.round(ahorro/totalInc*100):null;
-  var pctUsado=totalLim>0?Math.round(totalSpent/totalLim*100):0;
-  var colorG=totalSpent>totalLim&&totalLim>0?'#b91c1c':'#0f6e56';
-  var colorT=tasaAhorro===null?'var(--dim)':tasaAhorro>=20?'#0f6e56':tasaAhorro>=10?'#92600a':'#b91c1c';
-  var textoT=tasaAhorro===null?'Define limites para calcular':tasaAhorro>=20?'Meta saludable (>20%)':tasaAhorro>=10?'Mejorable (10-20%)':'Bajo (menos del 10%)';
-  // Tasa ahorro REAL (basada en ingresos y gastos reales)
-  var tasaAhorroReal=totalInc>0?Math.round((totalInc-totalSpent)/totalInc*100):null;
   var montoAhorrado=totalInc-totalSpent;
-  var colorTReal=tasaAhorroReal===null?'var(--dim)':tasaAhorroReal>=20?'#0f6e56':tasaAhorroReal>=10?'#92600a':'#b91c1c';
-
-  document.getElementById('lim-summary').innerHTML=
-    '<div class="lim-sc"><div class="sc-lbl">Total ingresos</div><div class="sc-val" style="color:#0f6e56">'+fmtCLP(totalInc)+'</div><div class="sc-sub">periodo actual</div></div>'+
-    '<div class="lim-sc"><div class="sc-lbl">Total gastado</div><div class="sc-val" style="color:'+colorG+'">'+fmtCLP(totalSpent)+'</div><div class="sc-sub">'+(totalLim>0?pctUsado+'% del presupuesto':'Sin presupuesto aun')+'</div></div>'+
-    '<div class="lim-sc"><div class="sc-lbl">Monto ahorrado</div><div class="sc-val" style="color:'+(montoAhorrado>=0?'#1d4ed8':'#b91c1c')+'">'+fmtCLP(Math.abs(montoAhorrado))+'</div><div class="sc-sub">'+(montoAhorrado>=0?'disponible':'deficit')+'</div></div>'+
-    '<div class="lim-sc"><div class="sc-lbl">Tasa ahorro real</div><div class="sc-val" style="color:'+colorTReal+'">'+(tasaAhorroReal===null?'-':tasaAhorroReal+'%')+'</div><div class="sc-sub">ingresos vs gastos reales</div></div>'+
-    '<div class="lim-sc"><div class="sc-lbl">Tasa ahorro proyectada</div><div class="sc-val" style="color:'+colorT+'">'+(tasaAhorro===null?'-':tasaAhorro+'%')+'</div><div class="sc-sub">'+textoT+'</div></div>'+
-    '<div class="lim-sc"><div class="sc-lbl">Total presupuestado</div><div class="sc-val" style="color:#1d4ed8">'+fmtCLP(totalLim)+'</div><div class="sc-sub">'+EXP.filter(function(c){return limits[c]>0}).length+' de '+EXP.length+' categorias</div></div>';
-  document.getElementById('lim-grid').innerHTML=EXP.map(function(cat){
-    var info=CATS[cat]||{icon:'?',color:'#888'},lim=limits[cat]||0,spent=ct[cat]||0;
-    var pctUso=lim?Math.round(spent/lim*100):0;  // sin cap para mostrar >100%
-    var pctDel=totalLim>0&&lim>0?Math.round(lim/totalLim*100):null;
-    var color=lim?pctClr(pctUso):info.color;
-    var badge=pctDel!==null?'<span class="lim-pct-budget">'+pctDel+'% del total</span>':'';
-    var barWidth=lim?Math.min(pctUso,100):0;
-    var extraBar=lim&&pctUso>100?'<div class="lp-track" style="margin-top:3px"><div class="lp-fill" style="width:100%;background:#b91c1c;opacity:0.4"></div></div>':'';
-    var barra=lim?'<div class="lp-track"><div class="lp-fill" style="width:'+barWidth+'%;background:'+color+'"></div></div>'+extraBar+'<div class="lp-meta"><span>'+fmtCLP(spent)+' gastado</span><span style="color:'+color+'">'+pctUso+'% de '+fmtCLP(lim)+'</span></div>':'<div style="font-size:11px;color:var(--dim);padding-top:2px">Sin limite definido</div>';
-    return '<div class="lim-card"><div class="lim-top"><span class="lim-icon">'+info.icon+'</span><span class="lim-name">'+cat+'</span>'+badge+'<input class="lim-inp" type="number" placeholder="Sin limite" value="'+(lim||'')+'" onchange="setLimit(\''+cat+'\',this.value)"/></div>'+barra+'</div>';
+  var tasaReal=totalInc>0?Math.round(montoAhorrado/totalInc*100):0;
+  var metaAhorro=70; // meta fija 70%
+  var pctUsado=totalLim>0?Math.round(totalSpent/totalLim*100):0;
+ 
+  // ── HERO CARD ──
+  var heroEl=document.getElementById('lim-hero-wrap');
+  if(heroEl){
+    var markerPct=Math.min(metaAhorro,100);
+    var barPct=Math.min(Math.max(tasaReal,0),100);
+    var heroColor=tasaReal>=metaAhorro?'#22C55E':tasaReal>=20?'#F59E0B':'#EF4444';
+    var gastadoColor=totalLim>0&&totalSpent>totalLim?'#EF4444':'#F87171';
+    heroEl.innerHTML=
+      '<div class="lim-hero">'+
+        '<div class="lim-hero-avail-lbl">Disponible este mes</div>'+
+        '<div class="lim-hero-avail">'+fmtCLP(Math.max(0,montoAhorrado))+'</div>'+
+        '<div class="lim-hero-stats">'+
+          '<div class="lim-hero-stat"><div class="hs-lbl">Ingresos</div><div class="hs-val" style="color:#4ADE80">'+fmtCLP(totalInc)+'</div><div class="hs-sub" style="color:rgba(255,255,255,0.5)">periodo actual</div></div>'+
+          '<div class="lim-hero-stat"><div class="hs-lbl">Gastado</div><div class="hs-val" style="color:#F87171">'+fmtCLP(totalSpent)+'</div><div class="hs-sub" style="color:rgba(255,255,255,0.5)">'+(totalLim>0?pctUsado+'% presup.':'sin presupuesto')+'</div></div>'+
+          '<div class="lim-hero-stat"><div class="hs-lbl">Ahorro real</div><div class="hs-val" style="color:'+heroColor+'">'+tasaReal+'%</div><div class="hs-sub" style="color:#F59E0B">Meta: '+metaAhorro+'%</div></div>'+
+        '</div>'+
+        '<div class="lim-hero-bar-wrap">'+
+          '<div class="lim-hero-bar-fill" style="width:'+barPct+'%;background:'+heroColor+'"></div>'+
+          '<div class="lim-hero-bar-marker" style="left:'+markerPct+'%"></div>'+
+        '</div>'+
+        '<div class="lim-hero-bar-labels"><span>Ahorro actual: '+tasaReal+'%</span><span style="color:#F59E0B">Meta: '+metaAhorro+'%</span></div>'+
+      '</div>';
+  }
+ 
+  // ── CATEGORY CARDS — sorted by overage ──
+  var catData=EXP.map(function(cat){
+    var lim=limits[cat]||0, spent=ct[cat]||0;
+    var pct=lim>0?Math.round(spent/lim*100):0;
+    var excess=spent-(lim||0);
+    return{cat:cat,lim:lim,spent:spent,pct:pct,excess:excess};
+  }).sort(function(a,b){
+    // Sort: over limit first (by excess), then by pct, then zero
+    if(a.pct>100&&b.pct<=100)return -1;
+    if(b.pct>100&&a.pct<=100)return 1;
+    return b.pct-a.pct;
+  });
+ 
+  var gridEl=document.getElementById('lim-grid');
+  gridEl.innerHTML=catData.map(function(d){
+    var info=CATS[d.cat]||{icon:'?',color:'#888'};
+    var pctOfTotal=totalLim>0&&d.lim>0?Math.round(d.lim/totalLim*100):null;
+    var barWidth=Math.min(d.pct,100);
+    var cardCls=d.pct>100?'over':d.pct>=85?'warn':d.pct>0?'ok':'zero';
+    var badgeCls=d.pct>100?'over':d.pct>=85?'warn':d.pct>0?'ok':'zero';
+    var barColor=d.pct>100?'#EF4444':d.pct>=85?'#F59E0B':'#22C55E';
+    var spentCls=d.pct>100?'over':d.pct>0?'ok':'zero';
+    var badgeTxt=d.lim>0?d.pct+'%':'Sin limite';
+    return '<div class="lim-card '+cardCls+'">'+
+      '<div class="lim-top">'+
+        '<span class="lim-icon">'+info.icon+'</span>'+
+        '<span class="lim-name">'+d.cat+'</span>'+
+        '<span class="lim-badge '+badgeCls+'">'+badgeTxt+'</span>'+
+      '</div>'+
+      '<div class="lim-amounts">'+
+        '<span class="lim-spent '+spentCls+'">'+fmtCLP(d.spent)+'</span>'+
+        (d.lim?'<span class="lim-of">de '+fmtCLP(d.lim)+'</span>':'<span class="lim-of">sin limite</span>')+
+      '</div>'+
+      '<div class="lim-inp-wrap">'+
+        '<span class="lim-inp-lbl">Limite:</span>'+
+        '<input class="lim-inp" type="number" placeholder="Sin limite" value="'+(d.lim||'')+'" onchange="setLimit(''+d.cat+'',this.value)"/>'+
+      '</div>'+
+      (pctOfTotal!==null?'<div class="lim-pct-of-total">'+pctOfTotal+'% del presupuesto total</div>':'')+
+      (d.lim?'<div class="lp-track"><div class="lp-fill" style="width:'+barWidth+'%;background:'+barColor+'"></div></div>':'<div class="lp-track"></div>')+
+    '</div>';
   }).join('');
+ 
+  // ── ALERT ──
+  var alertEl=document.getElementById('lim-alert-wrap');
+  if(alertEl){
+    var overCats=catData.filter(function(d){return d.pct>100&&d.lim>0});
+    if(overCats.length>0){
+      var totalExcess=overCats.reduce(function(s,d){return s+d.excess},0);
+      var top3=overCats.slice(0,3).map(function(d){return d.cat+' (+'+fmtCLP(d.excess)+')'}).join(', ');
+      alertEl.innerHTML='<div class="lim-alert">'+
+        '<div class="lim-alert-icon">&#9888;</div>'+
+        '<div><div class="lim-alert-ttl">'+overCats.length+' categoria'+(overCats.length>1?'s':'')+' sobre el limite este mes</div>'+
+        '<div class="lim-alert-txt">'+top3+' son los mayores excesos. Representan '+fmtCLP(totalExcess)+' sobre presupuesto.</div></div>'+
+      '</div>';
+    } else {
+      alertEl.innerHTML='';
+    }
+  }
+ 
+  // ── TIP ──
+  var tipEl=document.getElementById('lim-tip-wrap');
+  if(tipEl&&totalInc>0){
+    var targetSaving=Math.round(totalInc*metaAhorro/100);
+    var currentSaving=totalInc-totalSpent;
+    var gap=targetSaving-currentSaving;
+    if(gap>0){
+      var topOver=catData.filter(function(d){return d.pct>100&&d.lim>0}).slice(0,2);
+      var tipCats=topOver.length>0?topOver.map(function(d){return d.cat}).join(' y '):'las categorias con mayor gasto';
+      var topOverSavings=topOver.reduce(function(s,d){return s+d.excess},0);
+      var pctCovered=topOver.length>0?Math.round(topOverSavings/gap*100):0;
+      tipEl.innerHTML='<div class="lim-tip">'+
+        '<div class="lim-tip-icon">&#128161;</div>'+
+        '<div><div class="lim-tip-ttl">Para llegar al '+metaAhorro+'% de ahorro</div>'+
+        '<div class="lim-tip-txt">Necesitas reducir '+fmtCLP(gap)+' en gastos este mes. '+
+        (topOver.length>0?'Ajustar solo '+tipCats+' a su limite cubriria el '+pctCovered+'% de esa brecha.':'Revisa tus categorias principales.')+
+        '</div></div>'+
+      '</div>';
+    } else {
+      tipEl.innerHTML='<div class="lim-tip"><div class="lim-tip-icon">&#127881;</div><div><div class="lim-tip-ttl">Meta de ahorro alcanzada</div><div class="lim-tip-txt">Tu tasa de ahorro actual ('+tasaReal+'%) supera la meta del '+metaAhorro+'%. Excelente gestion financiera.</div></div></div>';
+    }
+  }
 }
-
+ 
 function sugerirPresupuesto(){
   var keys=[...new Set(txns.map(function(t){return monthKey(t.fecha)}).filter(Boolean))].sort();
   var last3=keys.slice(-3);
@@ -733,10 +853,10 @@ function sugerirPresupuesto(){
   if(n>0){localStorage.setItem('fc_limits',JSON.stringify(limits));renderAll();alert('Se aplicaron '+n+' sugerencias.')}
   else alert('Todas las categorias ya tienen limite.');
 }
-
+ 
 function closeOverlay(id){document.getElementById(id).classList.remove('open');_modalId=null}
 function agregarEdicion(e){editLog.unshift(e);localStorage.setItem('fc_editlog',JSON.stringify(editLog))}
-
+ 
 function abrirEliminar(id){
   _modalId=id;
   var t=txns.find(function(x){return x.id===id});
@@ -777,7 +897,7 @@ function confirmarDividir(){
   localStorage.setItem('fc_adj',JSON.stringify(adjStore));
   closeOverlay('ov-div');renderAll();
 }
-
+ 
 function updAddCats(){
   var tipo=document.getElementById('add-tipo').value,cats=tipo==='income'?INC:EXP;
   document.getElementById('add-cat').innerHTML=cats.map(function(c){return'<option value="'+c+'">'+(CATS[c]?CATS[c].icon:'')+' '+c+'</option>'}).join('');updAddSubs();
@@ -821,7 +941,7 @@ function renderManList(){
     return '<div class="man-row"><div class="man-dot" style="background:'+info.color+'"></div><div class="man-info"><div class="man-desc">'+m.descripcion+'</div><div class="man-meta">'+m.cat+(m.sub?' - '+m.sub:'')+' - '+m.fecha+'</div></div><span class="amt '+cls+'">'+sign+fmtCLP(m.monto)+'</span><button class="man-del" onclick="delManual(\''+m.id+'\')">&#10005;</button></div>';
   }).join('');
 }
-
+ 
 function limpiarEdiciones(){
   if(!confirm('Seguro que quieres limpiar todo el historial?'))return;
   editLog=[];localStorage.setItem('fc_editlog',JSON.stringify(editLog));renderEdiciones();
@@ -836,7 +956,7 @@ function renderEdiciones(){
       return '<tr><td style="font-size:11px;color:var(--muted);white-space:nowrap;padding-right:12px">'+e.timestamp+'</td><td><span style="font-size:11px;font-weight:500;color:'+color+'">'+e.tipo+'</span></td><td class="txn-desc">'+e.descripcion+'</td><td style="font-size:12px;font-family:var(--mono);color:var(--red)">'+fmtCLP(e.monto)+'</td><td style="font-size:11px;color:var(--muted)">'+e.fecha+'</td><td style="font-size:12px;color:var(--muted)">'+e.motivo+'</td></tr>';
     }).join('')+'</tbody></table>';
 }
-
+ 
 function exportarCSV(){
   if(!txns.length){alert('No hay datos para exportar.');return}
   var lines=['fecha,descripcion,monto,tipo,categoria,subcategoria,origen'];
@@ -846,7 +966,7 @@ function exportarCSV(){
   a.href=url;a.download='finanzas'+(selMonth&&selMonth!=='all'?'_'+selMonth:'_todos')+'.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
-
+ 
 window.addEventListener('resize',function(){if(txns.length)renderTreemap(tmDrillCat)});
 document.addEventListener('click',function(e){
   var dd=document.getElementById('mdd');
