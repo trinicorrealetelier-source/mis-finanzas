@@ -598,8 +598,8 @@ function pickMonth(m) {
 }
 
 // ─── Carga de datos desde Google Sheets ───────────────────────────────────────
+// ─── Carga de datos desde Google Sheets ───────────────────────────────────────
 async function cargarDatos() {
-  // Guard: evita fetches en paralelo si el usuario hace doble-click
   if (_fetchInProgress) return;
   _fetchInProgress = true;
 
@@ -609,10 +609,10 @@ async function cargarDatos() {
   lbl.textContent = 'Cargando...';
 
   try {
-var controller  = new AbortController();
+    var controller  = new AbortController();
     var timeoutId   = setTimeout(function() { controller.abort(); }, 15000);
     
-    // El truco para engañar a la caché agregando los milisegundos actuales
+    // URL con anti-caché
     var urlSinCache = API + '?t=' + new Date().getTime(); 
     var res         = await fetch(urlSinCache, { signal: controller.signal });
     
@@ -621,9 +621,7 @@ var controller  = new AbortController();
     if (!res.ok) throw new Error('HTTP ' + res.status);
 
     var text = await res.text();
-    var data;
-    try { data = JSON.parse(text); }
-    catch(e) { throw new Error('Respuesta invalida del servidor. Verifica que la Web App este publicada correctamente.'); }
+    var data = JSON.parse(text);
 
     var remote = data
       .filter(function(r) { return r.monto || r.Monto; })
@@ -633,25 +631,74 @@ var controller  = new AbortController();
         var montoStr = String(r.monto || r.Monto || '0').replace(/[$.,]/g, '').trim();
         var monto    = parseInt(montoStr, 10) || 0;
         var tipoRaw  = String(r.tipo || r.Tipo || 'gasto').toLowerCase();
-       // Agregamos subRaw para leer la subcategoría que viene del Excel
-        var catRaw   = String(r.categoria || r.Categoria || 'Otros gastos');
-        var subRaw   = String(r.subcategoria || r.Subcategoria || ''); // <-- NUEVO
-        var id       = String(r.id_operacion || r.id || 'row_' + (i + 2));
-        var isIncome = tipoRaw.includes('ingreso');
-        var origenRaw = String(r.origen || r.Origen || 'banco');
-
-        // Clave de fallback para migrar categorías guardadas antes de que hubiera id_operacion
-        var fk = desc.trim().toLowerCase() + '_' + fecha + '_' + monto;
         
-        // Aquí le decimos: Usa lo que edité en la app. Si no he editado nada, usa lo del Excel (catRaw / subRaw)
-        var catFinal = catStore[id] || catStore[fk] || (isIncome ? 'Transferencias recibidas' : catRaw);
-        var subFinal = subStore[id] || subStore[fk] || subRaw; // <-- CAMBIAMOS EL '' POR subRaw
+        // LEEMOS TODO DEL EXCEL
+        var catRaw   = String(r.categoria || r.Categoria || 'Otros gastos');
+        var subRaw   = String(r.subcategoria || r.Subcategoria || '').trim(); // <-- AQUI SE LEE LA SUB
+        var origenRaw = String(r.origen || r.Origen || 'banco');
+        var id       = String(r.id_operacion || r.id || 'row_' + (i + 2));
+        var isIncome = tipoRaw.includes('ingreso');
 
-        // Migrar clave fk → id para nuevas escrituras
+        var fk = desc.trim().toLowerCase() + '_' + fecha + '_' + monto;
+        
+        // FUSIONAMOS MEMORIA LOCAL CON EXCEL
+        var catFinal = catStore[id] || catStore[fk] || (isIncome ? 'Transferencias recibidas' : catRaw);
+        // Si no hay edición manual, USAMOS subRaw obligatoriamente
+        var subFinal = subStore[id] || subStore[fk] || subRaw; 
+
         if (catStore[fk] && !catStore[id]) {
           catStore[id] = catStore[fk];
           subStore[id] = subStore[fk];
         }
+
+        return { id: id, fecha: fecha, descripcion: desc, monto: monto,
+                 tipo: isIncome ? 'income' : 'expense',
+                 cat: catFinal, sub: subFinal, manual: false, fk: fk, origen: origenRaw };
+      })
+      .filter(function(t) { return t.monto > 0; });
+
+    var remoteIds = new Set(remote.map(function(t) { return t.id; }));
+    txns = remote.concat(manuals.filter(function(m) { return !remoteIds.has(m.id); }));
+
+    var deletedSet = new Set(deletedStore);
+    txns = txns.filter(function(t) { return !deletedSet.has(t.id); });
+    txns.forEach(function(t) { if (adjStore[t.id] !== undefined) t.monto = adjStore[t.id]; });
+    txns = txns.filter(function(t) { return t.monto > 0; });
+
+    txns.forEach(function(t) {
+      if (t.cat === 'Otros gastos' && t.sub === 'Carrete') {
+        t.cat = 'Carrete';
+        t.sub = '';
+        catStore[t.id] = 'Carrete';
+        subStore[t.id] = '';
+      }
+    });
+    persistCatStores();
+
+    txns.sort(function(a, b) {
+      var da = a.fecha.split('-').reverse().join('');
+      var db = b.fecha.split('-').reverse().join('');
+      return db.localeCompare(da);
+    });
+
+    if (!selMonth) {
+      var keys = Array.from(new Set(txns.map(function(t) { return monthKey(t.fecha); }).filter(Boolean))).sort();
+      selMonth = keys.indexOf('2026-03') !== -1 ? '2026-03' : (keys[keys.length - 1] || 'all');
+    }
+
+    var sp = selMonth.split('-');
+    document.getElementById('vs').textContent = selMonth === 'all' ? 'Todos los meses' : (MONTH_LABELS[sp[1]] || sp[1]) + ' ' + sp[0];
+
+    renderAll();
+
+  } catch(e) {
+    document.getElementById('vs').textContent = 'Error al cargar';
+  }
+
+  btn.classList.remove('loading');
+  lbl.textContent = 'Actualizar';
+  _fetchInProgress = false;
+}
 
 return { id: id, fecha: fecha, descripcion: desc, monto: monto,
                  tipo: isIncome ? 'income' : 'expense',
@@ -794,9 +841,16 @@ function buildCatOptions(selectedCat, includeAll) {
 
 function buildSubOptions(cat, selectedSub) {
   var subs = CATS[cat] ? CATS[cat].subs : [];
+  
+  // FIX: Fuerza a mostrar la subcategoría del Excel aunque no esté en la lista exacta
+  var opcionesFinales = subs.slice();
+  if (selectedSub && opcionesFinales.indexOf(selectedSub) === -1) {
+    opcionesFinales.push(selectedSub);
+  }
+
   return ['<option value="">Subcategoria...</option>']
-    .concat(subs.map(function(s) {
-      var sel = s === selectedSub ? ' selected' : '';
+    .concat(opcionesFinales.map(function(s) {
+      var sel = (s === selectedSub) ? ' selected' : '';
       return '<option value="' + s + '"' + sel + '>' + s + '</option>';
     })).join('');
 }
