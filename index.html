@@ -743,6 +743,10 @@ function renderMov(){
 }
 function setFilter(c){filterCat=c==='Todos'?null:c;renderMov()}
 
+function setLimitFromInput(el){
+  setLimit(el.getAttribute('data-cat'), el.value);
+}
+
 function renderLim(){
   var ct=catTotals();
   var totalLim=EXP.reduce(function(s,cat){return s+(limits[cat]||0)},0);
@@ -751,16 +755,13 @@ function renderLim(){
   var totalInc=ft.filter(function(t){return t.tipo==='income'}).reduce(function(s,t){return s+t.monto},0);
   var montoAhorrado=totalInc-totalSpent;
   var tasaReal=totalInc>0?Math.round(montoAhorrado/totalInc*100):0;
-  var metaAhorro=70; // meta fija 70%
+  var metaAhorro=70;
   var pctUsado=totalLim>0?Math.round(totalSpent/totalLim*100):0;
 
-  // ── HERO CARD ──
   var heroEl=document.getElementById('lim-hero-wrap');
   if(heroEl){
-    var markerPct=Math.min(metaAhorro,100);
     var barPct=Math.min(Math.max(tasaReal,0),100);
     var heroColor=tasaReal>=metaAhorro?'#22C55E':tasaReal>=20?'#F59E0B':'#EF4444';
-    var gastadoColor=totalLim>0&&totalSpent>totalLim?'#EF4444':'#F87171';
     heroEl.innerHTML=
       '<div class="lim-hero">'+
         '<div class="lim-hero-avail-lbl">Disponible este mes</div>'+
@@ -772,20 +773,18 @@ function renderLim(){
         '</div>'+
         '<div class="lim-hero-bar-wrap">'+
           '<div class="lim-hero-bar-fill" style="width:'+barPct+'%;background:'+heroColor+'"></div>'+
-          '<div class="lim-hero-bar-marker" style="left:'+markerPct+'%"></div>'+
+          '<div class="lim-hero-bar-marker" style="left:'+metaAhorro+'%"></div>'+
         '</div>'+
         '<div class="lim-hero-bar-labels"><span>Ahorro actual: '+tasaReal+'%</span><span style="color:#F59E0B">Meta: '+metaAhorro+'%</span></div>'+
       '</div>';
   }
 
-  // ── CATEGORY CARDS — sorted by overage ──
   var catData=EXP.map(function(cat){
     var lim=limits[cat]||0, spent=ct[cat]||0;
     var pct=lim>0?Math.round(spent/lim*100):0;
     var excess=spent-(lim||0);
     return{cat:cat,lim:lim,spent:spent,pct:pct,excess:excess};
   }).sort(function(a,b){
-    // Sort: over limit first (by excess), then by pct, then zero
     if(a.pct>100&&b.pct<=100)return -1;
     if(b.pct>100&&a.pct<=100)return 1;
     return b.pct-a.pct;
@@ -801,7 +800,9 @@ function renderLim(){
     var barColor=d.pct>100?'#EF4444':d.pct>=85?'#F59E0B':'#22C55E';
     var spentCls=d.pct>100?'over':d.pct>0?'ok':'zero';
     var badgeTxt=d.lim>0?d.pct+'%':'Sin limite';
-    return '<div class="lim-card '+cardCls+'">'+
+    var el=document.createElement('div');
+    el.className='lim-card '+cardCls;
+    el.innerHTML=
       '<div class="lim-top">'+
         '<span class="lim-icon">'+info.icon+'</span>'+
         '<span class="lim-name">'+d.cat+'</span>'+
@@ -813,31 +814,32 @@ function renderLim(){
       '</div>'+
       '<div class="lim-inp-wrap">'+
         '<span class="lim-inp-lbl">Limite:</span>'+
-        '<input class="lim-inp" type="number" placeholder="Sin limite" value="'+(d.lim||'')+'" onchange="setLimit(''+d.cat+'',this.value)"/>'+
+        '<input class="lim-inp" type="number" placeholder="Sin limite" value="'+(d.lim||'')+'" />'+
       '</div>'+
       (pctOfTotal!==null?'<div class="lim-pct-of-total">'+pctOfTotal+'% del presupuesto total</div>':'')+
-      (d.lim?'<div class="lp-track"><div class="lp-fill" style="width:'+barWidth+'%;background:'+barColor+'"></div></div>':'<div class="lp-track"></div>')+
-    '</div>';
+      (d.lim?'<div class="lp-track"><div class="lp-fill" style="width:'+barWidth+'%;background:'+barColor+'"></div></div>':'<div class="lp-track"></div>');
+    // Attach event listener directly - no inline string issues
+    var inp=el.querySelector('input');
+    if(inp)(function(cat){inp.addEventListener('change',function(){setLimit(cat,this.value)})})(d.cat);
+    return el.outerHTML;
   }).join('');
 
-  // ── ALERT ──
+  // Re-attach event listeners after innerHTML set
+  gridEl.querySelectorAll('.lim-inp').forEach(function(inp,i){
+    var cat=catData[i]?catData[i].cat:null;
+    if(cat)inp.addEventListener('change',function(){setLimit(cat,this.value)});
+  });
+
   var alertEl=document.getElementById('lim-alert-wrap');
   if(alertEl){
     var overCats=catData.filter(function(d){return d.pct>100&&d.lim>0});
     if(overCats.length>0){
       var totalExcess=overCats.reduce(function(s,d){return s+d.excess},0);
       var top3=overCats.slice(0,3).map(function(d){return d.cat+' (+'+fmtCLP(d.excess)+')'}).join(', ');
-      alertEl.innerHTML='<div class="lim-alert">'+
-        '<div class="lim-alert-icon">&#9888;</div>'+
-        '<div><div class="lim-alert-ttl">'+overCats.length+' categoria'+(overCats.length>1?'s':'')+' sobre el limite este mes</div>'+
-        '<div class="lim-alert-txt">'+top3+' son los mayores excesos. Representan '+fmtCLP(totalExcess)+' sobre presupuesto.</div></div>'+
-      '</div>';
-    } else {
-      alertEl.innerHTML='';
-    }
+      alertEl.innerHTML='<div class="lim-alert"><div class="lim-alert-icon">&#9888;</div><div><div class="lim-alert-ttl">'+overCats.length+' categoria'+(overCats.length>1?'s':'')+' sobre el limite</div><div class="lim-alert-txt">'+top3+'. Total exceso: '+fmtCLP(totalExcess)+'</div></div></div>';
+    }else{alertEl.innerHTML=''}
   }
 
-  // ── TIP ──
   var tipEl=document.getElementById('lim-tip-wrap');
   if(tipEl&&totalInc>0){
     var targetSaving=Math.round(totalInc*metaAhorro/100);
@@ -845,18 +847,12 @@ function renderLim(){
     var gap=targetSaving-currentSaving;
     if(gap>0){
       var topOver=catData.filter(function(d){return d.pct>100&&d.lim>0}).slice(0,2);
-      var tipCats=topOver.length>0?topOver.map(function(d){return d.cat}).join(' y '):'las categorias con mayor gasto';
+      var tipCats=topOver.length>0?topOver.map(function(d){return d.cat}).join(' y '):'las categorias principales';
       var topOverSavings=topOver.reduce(function(s,d){return s+d.excess},0);
       var pctCovered=topOver.length>0?Math.round(topOverSavings/gap*100):0;
-      tipEl.innerHTML='<div class="lim-tip">'+
-        '<div class="lim-tip-icon">&#128161;</div>'+
-        '<div><div class="lim-tip-ttl">Para llegar al '+metaAhorro+'% de ahorro</div>'+
-        '<div class="lim-tip-txt">Necesitas reducir '+fmtCLP(gap)+' en gastos este mes. '+
-        (topOver.length>0?'Ajustar solo '+tipCats+' a su limite cubriria el '+pctCovered+'% de esa brecha.':'Revisa tus categorias principales.')+
-        '</div></div>'+
-      '</div>';
-    } else {
-      tipEl.innerHTML='<div class="lim-tip"><div class="lim-tip-icon">&#127881;</div><div><div class="lim-tip-ttl">Meta de ahorro alcanzada</div><div class="lim-tip-txt">Tu tasa de ahorro actual ('+tasaReal+'%) supera la meta del '+metaAhorro+'%. Excelente gestion financiera.</div></div></div>';
+      tipEl.innerHTML='<div class="lim-tip"><div class="lim-tip-icon">&#128161;</div><div><div class="lim-tip-ttl">Para llegar al '+metaAhorro+'% de ahorro</div><div class="lim-tip-txt">Necesitas reducir '+fmtCLP(gap)+' en gastos este mes. '+(topOver.length>0?'Ajustar '+tipCats+' a su limite cubriria el '+pctCovered+'% de esa brecha.':'Revisa tus categorias.')+' </div></div></div>';
+    }else{
+      tipEl.innerHTML='<div class="lim-tip"><div class="lim-tip-icon">&#127881;</div><div><div class="lim-tip-ttl">Meta de ahorro alcanzada</div><div class="lim-tip-txt">Tu tasa de ahorro ('+tasaReal+'%) supera la meta del '+metaAhorro+'%.</div></div></div>';
     }
   }
 }
